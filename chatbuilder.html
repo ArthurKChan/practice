@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Chatbuilder</title>
+    <script src="http://chatbuilder.hackreactor.com/ChatBuilder.js"></script>
+    
+  </head>
+  <body>
+
+    <script>
+    delete Chat.display;
+    delete Chat.fetch;
+
+      //Chat.guide.start();
+
+      var listDisplay = function(list){
+        $('li').remove();// selects all list items and removes them
+        for (var i=0; i<list.length; i++){
+          $('.messages').append('<li>'+list[i].text+'</li>');
+        }
+      }
+
+      //Chat.fetch(listDisplay); -rewritten
+      var fetch = function(){
+        $.ajax({
+          url:"https://api.parse.com/1/classes/chats",
+          data: {
+            order:"createdAt",
+          },
+          type: "GET",
+          dataType : "json",
+          success: function(json){
+            listDisplay(json.results);
+          },
+          error: function(xhr, status, errorThrown){
+            alert("Problem!");
+            console.log("Error: "+errorThrown);
+            console.log("Status: "+status);
+            console.dir( xhr );
+          },
+          complete: function(xhr, status){
+            console.log("request complete")
+          }
+        });
+      }
+
+    $(document).ready(function(){
+      
+      fetch();
+
+      setInterval(function(){fetch(listDisplay)}, 3000);
+      
+      $(".send").on("click", function(){
+        var msgText = $(".draft").val();
+        var msgFormatted = (params.username + ": " + msgText);
+        var dataPacket = JSON.stringify({
+          text: msgFormatted,
+          username: params.username
+        });
+        $.post("https://api.parse.com/1/classes/chats", dataPacket, function(response){
+          console.log("Post message successful")
+        });
+      });
+    });
+
+      // Your JavaScript code will go right here!
+    </script>
+
+    <h2>Arthur's Chat</h2>
+
+    <input class="draft" type="text"/> <button class="send">Send</button>
+
+    <ul class="messages">
+    </ul>
+
+  </body>
+</html>
